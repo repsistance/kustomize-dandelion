@@ -1,0 +1,35 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cardano-node-headless
+  labels:
+    io.kompose.service: cardano-node
+spec:
+  sessionAffinity: ClientIP
+  clusterIP: None
+  type: ClusterIP
+  ports:
+  - name: socat-tcp-server
+    port: 30000
+    targetPort: 30000
+    protocol: TCP
+  selector:
+    io.kompose.service: cardano-node
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    io.kompose.service: cardano-node
+  name: chisel-server
+spec:
+  ports:
+  - name: chisel-server
+    port: 40000
+    targetPort: 40000
+  selector:
+    io.kompose.service: cardano-node
+status:
+  loadBalancer: {}

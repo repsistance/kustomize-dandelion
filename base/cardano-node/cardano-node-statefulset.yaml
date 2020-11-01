@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    io.kompose.service: cardano-node
+  name: cardano-node
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: cardano-node
+  serviceName: cardano-node
+  updateStrategy:
+    type: OnDelete
+  template:
+    metadata:
+      labels:
+        io.kompose.service: cardano-node
+    spec:
+      initContainers:
+      - name: remove-lost-n-found
+        image: busybox
+        imagePullPolicy: Always
+        command: ["sh", "-c", "rm -rf /data/db/lost+found"]
+        resources: {}
+        volumeMounts:
+        - mountPath: /data/db
+          name: node-db
+      containers:
+      - name: cardano-node
+        env:
+        - name: NETWORK
+          value: mainnet
+        image: inputoutput/cardano-node:1.21.1
+        imagePullPolicy: Always
+        resources: {}
+        volumeMounts:
+        - mountPath: /data/db
+          name: node-db
+        - mountPath: /ipc
+          name: node-ipc
+      - name: chisel-server
+        image: jpillora/chisel
+        env:
+        - name: PORT
+          value: "40000"
+        command: ["sh", "-c", "/app/chisel server -v --authfile /common-env/chisel-auth-file -p ${PORT:-40000}"]
+        ports:
+        - containerPort: 40000
+        volumeMounts:
+        - name: common-env
+          mountPath: /common-env
+          readOnly: true
+      - name: socat-tcp-server
+        image: alpine/socat
+        env:
+        - name: PORT
+          value: "30000"
+        command: ["sh", "-c", "socat TCP-LISTEN:${PORT},fork UNIX-CLIENT:/ipc/node.socket,ignoreeof"]
+        volumeMounts:
+        - mountPath: /ipc
+          name: node-ipc
+        ports:
+        - containerPort: 30000
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: node-db
+        persistentVolumeClaim:
+          claimName: node-db
+      - name: node-ipc
+        emptyDir: {}
+      - name: common-env
+        configMap:
+          name: common-env
+
+  volumeClaimTemplates:
+  - metadata:
+      name: node-db
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 8Gi

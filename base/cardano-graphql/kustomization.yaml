@@ -1,0 +1,6 @@
+namespace: dandelion
+resources:
+- configmap.yaml
+- pvc.yaml
+- cardano-graphql-deployment.yaml
+- cardano-graphql-service.yaml

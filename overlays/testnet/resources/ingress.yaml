@@ -1,0 +1,110 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: cardano-explorer-api
+spec:
+  rules:
+    - host: explorer-api.testnet.local
+      http:
+        paths:
+          - backend:
+              serviceName: cardano-explorer-api
+              servicePort: 8101
+            path: /
+  # This section is only required if TLS is to be enabled for the Ingress
+  tls:
+  - hosts:
+    - explorer-api.testnet.local
+    #secretName: local-tls
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: cardano-submit-api
+spec:
+  rules:
+    - host: submit-api.testnet.local
+      http:
+        paths:
+          - backend:
+              serviceName: cardano-submit-api
+              servicePort: 8091
+            path: /
+  # This section is only required if TLS is to be enabled for the Ingress
+  tls:
+  - hosts:
+    - submit-api.testnet.local
+    #secretName: local-tls
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: cardano-graphql-api
+spec:
+  rules:
+    - host: graphql-api.testnet.local
+      http:
+        paths:
+          - backend:
+              serviceName: cardano-graphql
+              servicePort: 3100
+            path: /
+  # This section is only required if TLS is to be enabled for the Ingress
+  tls:
+  - hosts:
+    - graphql-api.testnet.local
+    #secretName: local-tls
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: chisel-api
+spec:
+  rules:
+    - host: chisel-api.testnet.local
+      http:
+        paths:
+          - backend:
+              serviceName: chisel-server
+              servicePort: 40000
+            path: /
+  # This section is only required if TLS is to be enabled for the Ingress
+  tls:
+  - hosts:
+    - chisel-api.testnet.local
+    #secretName: local-tls
+
+---
+#apiVersion: networking.k8s.io/v1beta1
+#kind: Ingress
+#metadata:
+#  annotations:
+#    kubernetes.io/ingress.class: nginx
+#  name: cardano-hasura-api
+#spec:
+#  rules:
+#    - host: hasura-api.testnet.local
+#      http:
+#        paths:
+#          - backend:
+#              serviceName: hasura
+#              servicePort: 8080
+#            path: /
+#  tls:
+#  - hosts:
+#    - hasura-api.testnet.local
+#  secretName: local-tls
+        
+#cardano-node-headless                     ClusterIP   None            <none>        30000/TCP   20h
+#hasura-headless                           ClusterIP   None            <none>        8080/TCP    20h

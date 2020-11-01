@@ -1,0 +1,4 @@
+namespace: dandelion
+resources:
+- cardano-submit-api-deployment.yaml
+- cardano-submit-api-service.yaml

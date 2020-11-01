@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: hasura
+  name: hasura
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: hasura
+  template:
+    metadata:
+      labels:
+        io.kompose.service: hasura
+    spec:
+      containers:
+      - name: hasura
+        #command: ["sh", "-c", "while true; do sleep 6969; done"]
+        env:
+        - name: HASURA_GRAPHQL_ENABLED_LOG_TYPES
+          value: startup, http-log, webhook-log, websocket-log, query-log
+        - name: HASURA_GRAPHQL_ENABLE_CONSOLE
+          value: "true"
+        - name: HASURA_GRAPHQL_ENABLE_TELEMETRY
+          value: "false"
+        - name: POSTGRES_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: common-env
+              key: POSTGRES_HOST_RW
+        - name: POSTGRES_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: common-env
+              key: POSTGRES_PORT
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: common-env
+              key: POSTGRES_DB
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: common-env
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: init0-postgresql-ha-postgresql
+              key: postgresql-password
+        image: inputoutput/cardano-graphql-hasura:8226d69b509e070afca85a090fe7f74deacfa61c
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        resources: {}
+        volumeMounts:
+        - name: common-env
+          mountPath: /run/secrets/common-env
+          readOnly: true
+        - name: postgres-password
+          mountPath: /run/secrets/postgres-password
+          readOnly: true
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: common-env
+        configMap:
+          name: common-env
+      - name: postgres-password
+        secret:
+          secretName: init0-postgresql-ha-postgresql
+          items:
+          - key: postgresql-password
+            path: POSTGRES_PASSWORD

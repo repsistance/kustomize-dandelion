@@ -1,0 +1,4 @@
+namespace: dandelion
+resources:
+- hasura-deployment.yaml
+- hasura-service.yaml

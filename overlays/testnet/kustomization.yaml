@@ -1,0 +1,49 @@
+namespace: dandelion-tn-production
+#namePrefix: ptn0-
+commonLabels:
+  environment: production
+  cardano_network: testnet
+  cardano_node_type: haskell
+  project_name: dandelion
+commonAnnotations:
+  note: free-apis!
+generators:
+- helm-chartInflator-postgres-ha.yaml
+bases:
+- ../../base/cardano-db-sync
+- ../../base/cardano-explorer-api
+- ../../base/cardano-graphql
+- ../../base/cardano-hasura
+- ../../base/cardano-node
+- ../../base/cardano-submit-api
+resources:
+- resources/common-env-configmap.yaml
+- resources/ingress.yaml
+
+patches:
+- path: patches/genesis-image.yaml
+  target:
+    kind: Deployment
+    name: cardano-graphql
+# cardano-db-sync
+- path: patches/cardano-db-sync-deployment-env.yaml
+  target:
+    kind: Deployment
+    name: cardano-db-sync
+- path: patches/cardano-db-sync-deployment-image.yaml
+  target:
+    kind: Deployment
+    name: cardano-db-sync
+# cardano-node
+- path: patches/cardano-node-pvc.yaml
+  target:
+    kind: StatefulSet
+    name: cardano-node
+- path: patches/cardano-node-deployment-env.yaml
+  target:
+    kind: StatefulSet
+    name: cardano-node
+- path: patches/cardano-node-deployment-image.yaml
+  target:
+    kind: StatefulSet
+    name: cardano-node
