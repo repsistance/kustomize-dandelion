@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: ogmios
+  name: ogmios
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: ogmios
+  template:
+    metadata:
+      labels:
+        io.kompose.service: ogmios
+    spec:
+      containers:
+      - name: socat-socket-server
+        image: alpine/socat
+        env:
+        - name: CARDANO_NODE_SOCKET_TCP_HOST
+          value: "cardano-node-headless"
+        - name: CARDANO_NODE_SOCKET_TCP_PORT
+          value: "30000"
+        command: ["sh", "-c", "socat -T 3600 UNIX-LISTEN:/ipc/node.socket,fork TCP:${CARDANO_NODE_SOCKET_TCP_HOST}:${CARDANO_NODE_SOCKET_TCP_PORT},ignoreeof"]
+        volumeMounts:
+        - mountPath: /ipc
+          name: node-ipc
+      - name: ogmios
+        env:
+        - name: OGMIOS_NETWORK
+          value: "mainnet"
+        - name: LISTEN_HOST
+          value: "0.0.0.0"
+        - name: LISTEN_PORT
+          value: "1337"
+        - name: NODE_SOCKET_PATH
+          value: "/ipc/node.socket"
+        - name: LOG_LEVEL
+          value: "Debug"
+        command: ["sh", "-c", "ogmios --node-socket ${NODE_SOCKET_PATH} --host ${LISTEN_HOST} --port ${LISTEN_PORT} --log-level ${LOG_LEVEL}"]
+        image: ktorz/ogmios:v2.0.0-beta
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 1337
+        resources: {}
+        volumeMounts:
+        - mountPath: /node-ipc
+          name: node-ipc
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: node-ipc
+        emptyDir: {}
