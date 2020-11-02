@@ -1,0 +1,4 @@
+namespace: dandelion
+resources:
+- deployment.yaml
+- service.yaml
