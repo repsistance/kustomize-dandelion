@@ -15,6 +15,7 @@ kustomize build --enable_alpha_plugins overlays/${OVERLAY} > overlays/${OVERLAY}
 
 ```
 NAMESPACE=dandelion-mainnet
+OVERLAY=mainnet
 kubectl get ns ${NAMESPACE} || kubectl create ns ${NAMESPACE}
 kubectl apply -n ${NAMESPACE} -f overlays/${OVERLAY}/output.yaml
 ```
