@@ -109,6 +109,30 @@ spec:
     - ogmios-api.mainnet.local
     #secretName: local-tls
 
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/websocket-services: postgrest
+    nginx.org/websocket-services: postgrest
+  name: postgrest-api
+spec:
+  rules:
+    - host: postgrest-api.mainnet.local
+      http:
+        paths:
+          - backend:
+              serviceName: postgrest
+              servicePort: 3000
+            path: /
+  # This section is only required if TLS is to be enabled for the Ingress
+  tls:
+  - hosts:
+    - postgrest-api.mainnet.local
+    #secretName: local-tls
+
 ##############################
 # TODO: authenticate this :P #
 ##############################
