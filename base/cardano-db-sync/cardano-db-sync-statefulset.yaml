@@ -1,11 +1,13 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   labels:
     io.kompose.service: cardano-db-sync
   name: cardano-db-sync
 spec:
   replicas: 1
+  updateStrategy:
+    type: OnDelete
   selector:
     matchLabels:
       io.kompose.service: cardano-db-sync
@@ -59,6 +61,8 @@ spec:
         - name: postgres-password
           mountPath: /run/secrets/postgres-password
           readOnly: true
+        - name: dbsync-statedir
+          mountPath: /var/lib/cdbsync
       - name: socat-socket-server
         image: alpine/socat
         env:
@@ -87,3 +91,15 @@ spec:
           items:
           - key: postgresql-password
             path: POSTGRES_PASSWORD
+      - name: dbsync-statedir
+        persistentVolumeClaim:
+          claimName: dbsync-statedir
+
+  volumeClaimTemplates:
+  - metadata:
+      name: dbsync-statedir
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
