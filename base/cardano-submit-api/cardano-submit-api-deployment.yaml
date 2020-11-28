@@ -22,7 +22,7 @@ spec:
           value: "cardano-node-headless"
         - name: CARDANO_NODE_SOCKET_TCP_PORT
           value: "30000"
-        command: ["sh", "-c", "socat -T 300 UNIX-LISTEN:/ipc/node.socket,fork TCP:${CARDANO_NODE_SOCKET_TCP_HOST}:${CARDANO_NODE_SOCKET_TCP_PORT},ignoreeof"]
+        command: ["sh", "-c", "socat UNIX-LISTEN:/ipc/node.socket,fork TCP:${CARDANO_NODE_SOCKET_TCP_HOST}:${CARDANO_NODE_SOCKET_TCP_PORT},ignoreeof"]
         volumeMounts:
         - mountPath: /ipc
           name: node-ipc
@@ -30,7 +30,7 @@ spec:
         env:
         - name: NETWORK
           value: mainnet
-        image: inputoutput/cardano-submit-api:2.1.3
+        image: inputoutput/cardano-submit-api:3.0.0
         imagePullPolicy: Always
         ports:
         - containerPort: 8090
