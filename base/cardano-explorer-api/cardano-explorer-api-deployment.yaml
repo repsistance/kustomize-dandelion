@@ -43,11 +43,36 @@ spec:
             secretKeyRef:
               name: init0-postgresql-ha-postgresql
               key: postgresql-password
-        image: inputoutput/cardano-explorer-api:2.1.3
+        image: inputoutput/cardano-explorer-api:3.0.0
         imagePullPolicy: Always
         name: cardano-explorer-api
         ports:
         - containerPort: 8100
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            httpHeaders:
+            - name: Custom-Header
+              value: Awesome
+            path: /api/genesis/summary
+            port: 8100
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            httpHeaders:
+            - name: Custom-Header
+              value: Awesome
+            path: /api/genesis/summary
+            port: 8100
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
         resources: {}
         volumeMounts:
         - name: common-env
