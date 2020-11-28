@@ -21,7 +21,7 @@ spec:
           valueFrom:
             configMapKeyRef:
               name: common-env
-              key: POSTGRES_HOST_RW
+              key: POSTGRES_HOST_RO
         - name: POSTGRES_PORT
           valueFrom:
             configMapKeyRef:
@@ -36,17 +36,17 @@ spec:
           valueFrom:
             configMapKeyRef:
               name: common-env
-              key: POSTGRES_USER
+              key: POSTGREST_USER_RO
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: init0-postgresql-ha-postgresql
-              key: postgresql-password
+              key: postgrest-ro-password
         - name: PGRST_DB_ANON_ROLE
           valueFrom:
             configMapKeyRef:
               name: common-env
-              key: POSTGRES_USER
+              key: POSTGREST_USER_RO
         ports:
         - containerPort: 3000
         image: postgrest/postgrest:v7.0.1
@@ -70,5 +70,5 @@ spec:
         secret:
           secretName: init0-postgresql-ha-postgresql
           items:
-          - key: postgresql-password
-            path: POSTGRES_PASSWORD
+          - key: postgrest-ro-password
+            path: POSTGREST_RO_PASSWORD
