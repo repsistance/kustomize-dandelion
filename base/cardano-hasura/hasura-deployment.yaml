@@ -5,7 +5,7 @@ metadata:
     io.kompose.service: hasura
   name: hasura
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       io.kompose.service: hasura
