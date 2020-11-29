@@ -11,6 +11,9 @@ spec:
   selector:
     matchLabels:
       io.kompose.service: cardano-db-sync
+  serviceName: cardano-db-sync
+  updateStrategy:
+    type: OnDelete
   template:
     metadata:
       labels:
@@ -48,7 +51,7 @@ spec:
             secretKeyRef:
               name: init0-postgresql-ha-postgresql
               key: postgresql-password
-        image: inputoutput/cardano-db-sync:6.0.0
+        image: repsistance/cardano-db-sync:erik-tmp-6.0.0
         #command: ["sh", "-c", "while true; do sleep 6969; done"]
         imagePullPolicy: Always
         resources: {}
