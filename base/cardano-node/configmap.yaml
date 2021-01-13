@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cardano-node
+data:
+  topology.json.passive: |
+    {
+       "Producers": [
+          {
+            "addr": "europe.relays-new.cardano-mainnet.iohk.io",
+            "port": 3001,
+            "valency": 2
+          }
+       ]
+     }

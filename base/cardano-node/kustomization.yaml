@@ -1,4 +1,5 @@
 namespace: dandelion
 resources:
-- cardano-node-statefulset.yaml
-- cardano-node-service.yaml
+- configmap.yaml
+- statefulset.yaml
+- service.yaml
