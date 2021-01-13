@@ -17,7 +17,7 @@ spec:
       initContainers:
       - name: configure
         command: ["bash", "/configmap/initContainer-entrypoint"]
-        image: repsistance/cardano-node:iohk-mn-passive-1.21.1
+        image: repsistance/cardano-node:iohk-mn-passive-1.24.2
         imagePullPolicy: "Always"
         volumeMounts:
         - name: cardano-graphql-config
@@ -52,7 +52,7 @@ spec:
           value: /run/secrets/common-env/POSTGRES_USER
         - name: POSTGRES_PASSWORD_FILE
           value: /run/secrets/postgres-password/POSTGRES_PASSWORD
-        image: inputoutput/cardano-graphql:3.0.0
+        image: inputoutput/cardano-graphql:3.1.0
         #command: ["sh", "-c", "while true; do sleep 6969; done"]
         imagePullPolicy: Always
         name: cardano-graphql
@@ -82,8 +82,7 @@ spec:
       serviceAccountName: ""
       volumes:
       - name: cardano-graphql-config
-        persistentVolumeClaim:
-          claimName: cardano-graphql-config
+        emptyDir: {}
       - name: cardano-graphql-configmap
         configMap:
           name: cardano-graphql-configmap
