@@ -1,4 +1,4 @@
-namespace: dandelion-mainnet
+namespace: dandelion-mn-production
 #namePrefix: ptn0-
 commonLabels:
   environment: production
@@ -15,19 +15,49 @@ bases:
 - ../../base/cardano-graphql
 - ../../base/cardano-hasura
 - ../../base/cardano-node
+- ../../base/cardano-rosetta
 - ../../base/cardano-submit-api
 - ../../base/ogmios
+- ../../base/postgrest
+- ../../base/postgres-ws
 resources:
 - resources/common-env-configmap.yaml
 - resources/ingress.yaml
 
 patches:
+- path: patches/genesis-image.yaml
+  target:
+    kind: Deployment
+    name: cardano-graphql
+# cardano-db-sync
+- path: patches/cardano-db-sync-deployment-env.yaml
+  target:
+    kind: Deployment
+    name: cardano-db-sync
+- path: patches/cardano-db-sync-deployment-image.yaml
+  target:
+    kind: Deployment
+    name: cardano-db-sync
 # cardano-node
+- path: patches/cardano-node-configmap.yaml
+  target:
+    kind: ConfigMap
+    name: cardano-node
 - path: patches/cardano-node-pvc.yaml
   target:
     kind: StatefulSet
     name: cardano-node
-- path: patches/postgres-ha-pvc.yaml
+- path: patches/cardano-node-deployment-env.yaml
   target:
     kind: StatefulSet
-    name: init0-postgresql-ha-postgresql
+    name: cardano-node
+- path: patches/cardano-node-deployment-image.yaml
+  target:
+    kind: StatefulSet
+    name: cardano-node
+# cardano-rosetta
+- path: patches/cardano-rosetta-deployment-image.yaml
+  target:
+    kind: Deployment
+    name: cardano-rosetta
+

@@ -4,7 +4,7 @@
     - name: EXTENDED
       value: "true"
     - name: NETWORK
-      value: testnet
+      value: mainnet
     - name: POSTGRES_HOST
       valueFrom:
         configMapKeyRef:

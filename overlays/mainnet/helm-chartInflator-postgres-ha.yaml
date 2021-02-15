@@ -5,5 +5,5 @@ metadata:
 chartHome: ../../base/helm-charts
 chartName: postgresql-ha
 releaseName: init0
-releaseNamespace: dandelion-mainnet
+releaseNamespace: dandelion-mn-production
 values: helm-postgres-ha-values.yaml

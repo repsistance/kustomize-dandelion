@@ -15,7 +15,11 @@ bases:
 - ../../base/cardano-graphql
 - ../../base/cardano-hasura
 - ../../base/cardano-node
+- ../../base/cardano-rosetta
 - ../../base/cardano-submit-api
+- ../../base/ogmios
+- ../../base/postgrest
+- ../../base/postgres-ws
 resources:
 - resources/common-env-configmap.yaml
 - resources/ingress.yaml
@@ -35,6 +39,10 @@ patches:
     kind: Deployment
     name: cardano-db-sync
 # cardano-node
+- path: patches/cardano-node-configmap.yaml
+  target:
+    kind: ConfigMap
+    name: cardano-node
 - path: patches/cardano-node-pvc.yaml
   target:
     kind: StatefulSet
@@ -47,3 +55,9 @@ patches:
   target:
     kind: StatefulSet
     name: cardano-node
+# cardano-rosetta
+- path: patches/cardano-rosetta-deployment-image.yaml
+  target:
+    kind: Deployment
+    name: cardano-rosetta
+

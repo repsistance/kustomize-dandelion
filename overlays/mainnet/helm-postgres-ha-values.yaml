@@ -314,7 +314,9 @@ pgpool:
   ## pgpool. Use this property in order to create new user/password entries that
   ## will be appended to the "pgpool_passwd" file
   ##
-  customUsers: {}
+  customUsers:
+    usernames: 'postgrest_ro'
+    passwords: 'CHANGEME'
   ##  Comma or semicolon separeted list of postgres usernames
   #   usernames: 'user01;user02'
 
@@ -337,7 +339,7 @@ pgpool:
 
   ## Number of replicas to deploy
   ##
-  replicaCount: 2
+  replicaCount: 1
 
   ## Additional pod annotations
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
