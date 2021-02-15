@@ -17,7 +17,7 @@ spec:
       initContainers:
       - name: configure
         command: ["bash", "/configmap/initContainer-entrypoint"]
-        image: repsistance/cardano-node:iohk-mn-passive-1.24.2
+        image: repsistance/cardano-node:iohk-mn-passive-1.25.1-1
         imagePullPolicy: "Always"
         volumeMounts:
         - name: cardano-graphql-config
@@ -52,7 +52,9 @@ spec:
           value: /run/secrets/common-env/POSTGRES_USER
         - name: POSTGRES_PASSWORD_FILE
           value: /run/secrets/postgres-password/POSTGRES_PASSWORD
-        image: inputoutput/cardano-graphql:3.1.0
+        - name: CARDANO_NODE_SOCKET_PATH
+          value: /ipc/node.socket
+        image: repsistance/cardano-graphql:3.2.0
         #command: ["sh", "-c", "while true; do sleep 6969; done"]
         imagePullPolicy: Always
         name: cardano-graphql
@@ -78,9 +80,27 @@ spec:
         - name: postgres-password
           mountPath: /run/secrets/postgres-password
           readOnly: true
+        - mountPath: /ipc
+          name: node-ipc
+      - name: socat-socket-server
+        image: alpine/socat
+        env:
+        - name: CARDANO_NODE_SOCKET_TCP_HOST
+          value: "cardano-node-headless"
+        - name: CARDANO_NODE_SOCKET_TCP_PORT
+          value: "30000"
+        - name: SOCAT_TIMEOUT
+          value: "3600"
+        command: ["sh", "-c", "socat UNIX-LISTEN:/ipc/node.socket,fork TCP:${CARDANO_NODE_SOCKET_TCP_HOST}:${CARDANO_NODE_SOCKET_TCP_PORT},ignoreeof"]
+        #command: ["sh", "-c", "socat -d -d -d -d -v UNIX-LISTEN:/ipc/node.socket TCP:${CARDANO_NODE_SOCKET_TCP_HOST}:${CARDANO_NODE_SOCKET_TCP_PORT},ignoreeof,keepalive,keepidle=10,keepintvl=10,keepcnt=100"]
+        volumeMounts:
+        - mountPath: /ipc
+          name: node-ipc
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
+      - name: node-ipc
+        emptyDir: {}
       - name: cardano-graphql-config
         emptyDir: {}
       - name: cardano-graphql-configmap
