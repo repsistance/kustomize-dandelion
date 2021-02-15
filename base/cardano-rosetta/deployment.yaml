@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: cardano-rosetta
+  name: cardano-rosetta
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: cardano-rosetta
+  template:
+    metadata:
+      labels:
+        io.kompose.service: cardano-rosetta
+    spec:
+      containers:
+      - env:
+        - name: BIND_ADDRESS
+          value: "0.0.0.0"
+        - name: PORT
+          value: "8080"
+        - name: LOGGER_LEVEL
+          value: debug
+        - name: DEFAULT_RELATIVE_TTL
+          value: "1000"
+        - name: NODE_ENV
+          value: "production"
+        - name: PAGE_SIZE
+          value: "30"
+        - name: GENESIS_SHELLEY_PATH
+          value: "/config/genesis/shelley.json"
+        - name: TOPOLOGY_FILE_PATH
+          value: "/config/cardano-node/topology.json"
+        - name: CARDANO_CLI_PATH
+          value: "/usr/local/bin/cardano-cli"
+        - name: CARDANO_NODE_PATH
+          value: "/usr/local/bin/cardano-node"
+        - name: CARDANO_NODE_SOCKET_PATH
+          value: "/ipc/node.socket"
+        - name: POSTGRES_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: common-env
+              key: POSTGRES_HOST_RO
+        - name: POSTGRES_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: common-env
+              key: POSTGRES_PORT
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: common-env
+              key: POSTGREST_USER_RO
+        - name: POSTGRES_PASS
+          valueFrom:
+            secretKeyRef:
+              name: init0-postgresql-ha-postgresql
+              key: postgrest-ro-password
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: common-env
+              key: POSTGRES_DB
+        image: inputoutput/cardano-rosetta:1.1.0
+        command: ['sh', '-c', 'DB_CONNECTION_STRING="postgresql://${POSTGRES_USER}:${POSTGRES_PASS}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}" node /cardano-rosetta-server/dist/src/server/index.js']
+        imagePullPolicy: Always
+        name: cardano-rosetta
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 15
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 15
+        resources: {}
+        volumeMounts:
+        - name: common-env
+          mountPath: /run/secrets/common-env
+          readOnly: true
+        - mountPath: /ipc
+          name: node-ipc
+      - name: socat-socket-server
+        image: alpine/socat
+        env:
+        - name: CARDANO_NODE_SOCKET_TCP_HOST
+          value: "cardano-node-headless"
+        - name: CARDANO_NODE_SOCKET_TCP_PORT
+          value: "30000"
+        - name: SOCAT_TIMEOUT
+          value: "3600"
+        command: ["sh", "-c", "socat UNIX-LISTEN:/ipc/node.socket,fork TCP:${CARDANO_NODE_SOCKET_TCP_HOST}:${CARDANO_NODE_SOCKET_TCP_PORT},ignoreeof"]
+        #command: ["sh", "-c", "socat -d -d -d -d -v UNIX-LISTEN:/ipc/node.socket TCP:${CARDANO_NODE_SOCKET_TCP_HOST}:${CARDANO_NODE_SOCKET_TCP_PORT},ignoreeof,keepalive,keepidle=10,keepintvl=10,keepcnt=100"]
+        volumeMounts:
+        - mountPath: /ipc
+          name: node-ipc
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: node-ipc
+        emptyDir: {}
+      - name: common-env
+        configMap:
+          name: common-env
+      - name: postgres-password
+        secret:
+          secretName: init0-postgresql-ha-postgresql
+          items:
+          - key: postgrest-ro-password
+            path: POSTGREST_RO_PASSWORD
